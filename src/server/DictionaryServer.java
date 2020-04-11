@@ -25,9 +25,6 @@ import javax.net.ServerSocketFactory;
  */
 public class DictionaryServer {
 
-
-
-
     // Identifies the user number connected
     private static int counter = 0;
 
