@@ -1,0 +1,3 @@
+apple:fruit
+orange:fruit
+banana:fruit
