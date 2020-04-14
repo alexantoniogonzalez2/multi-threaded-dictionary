@@ -12,24 +12,26 @@ import java.util.Scanner; // Import the Scanner class to read text files
  */
 public class Dictionary {
 
-    // Create a HashMap object called capitalCities
-    // final
-    private HashMap<String, String> words = new HashMap<String, String>();
+    // Create a HashMap object for the words of dictionary
+    private HashMap<String, String> words = new HashMap();
 
     public Dictionary(String filename){
 
-        try {
-            File myObj = new File(filename + ".txt");
-            try (Scanner myReader = new Scanner(myObj)) {
-                while (myReader.hasNextLine()) {
-                    String line = myReader.nextLine();
-                    String[] line_splitted = line.split(":");
-                    words.put(line_splitted[0], line_splitted[1]);
+        File myObj = new File(filename + ".txt");
+        try (Scanner myReader = new Scanner(myObj)) {
+            while (myReader.hasNextLine()) {
+                String line = myReader.nextLine();
+                try {
+                    String[] splitLine = line.split(":");
+                    words.put(splitLine[0], splitLine[1]);
+                } catch (Exception ArrayIndexOutOfBoundsException){
+                    ErrorInfo("Problem With Format");
+                    System.exit(1);
                 }
             }
         } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
+            ErrorInfo("File Not Found");
+            System.exit(1);
         }
     }
 
@@ -49,11 +51,20 @@ public class Dictionary {
         return this.words.containsKey(word);
     }
 
-    /*
-    public void print(){
-        System.out.println(words);
+    private static void ErrorInfo(String exception){
 
-    }*/
+        String output = "Error: " + exception + ". ";
 
-
+        switch (exception){
+            case "Problem With Format":
+                output += "There was a problem reading the file. Wrong word:meaning format.";
+                break;
+            case "File Not Found":
+                output += "It was not found the file 'file_name.txt' in the directory.";
+                break;
+            default:
+                output += "No tracked error.";
+        }
+        System.out.println(output);
+    }
 }

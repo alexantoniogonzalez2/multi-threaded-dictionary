@@ -1,100 +1,97 @@
 package client;
 import utilities.Message;
 
-import java.awt.*;
-import java.io.EOFException;
+import java.net.Socket;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+
 import java.io.IOException;
+import java.io.EOFException;
 import java.net.ConnectException;
-import java.net.Socket;
-import java.net.UnknownHostException;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-
 
 public class Client {
 
     public static void main(String[] args){
 
-        String ip = args[0];
-        int port = Integer.parseInt(args[1]);
+        // Declare the server ip and the port number
+        String ip = "";
+        int port = 0;
 
-        JFrame initialFrame = getInitialFrame();
-        initialFrame.setVisible(true);
+        try {
+            ip = args[0];
+            port = Integer.parseInt(args[1]);
+        } catch (ArrayIndexOutOfBoundsException Exception ){
+            ErrorMessage("Wrong Number of Parameters");
+            System.exit(1);
+        } catch (NumberFormatException Exception){
+            ErrorMessage("Wrong Input Type for Port Number");
+            System.exit(1);
+        }
 
-        try (Socket socket = new Socket(ip, port)){
-
+        // Try clause needed for socket object manipulation.
+        try {
+            Socket socket = new Socket(ip, port);
             System.out.println("Connection established");
 
-            // create an object output stream from the output stream so we can send an object through it
+            // Create the "Input Stream" and "Output Stream" objects for communicating
+            // with the client, directly through InputStream and OutputStream classes.
+            // Detailed alternative form: InputStream = clientSocket.getInputStream()
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
             ClientGUI clientGUI = new ClientGUI("Dictionary", out);
-            initialFrame.setVisible(false);
             clientGUI.setVisible(true);
 
             Message serverMsg;
             try {
-                while ((serverMsg = (Message) in.readObject()) != null)
+                while ((serverMsg = (Message) in.readObject()) != null )
                     clientGUI.processServerMessage(serverMsg);
 
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                socket.close();
+                System.out.println("Socket close");
+            } catch (ClassNotFoundException exception) { // Exception throws by readObject method.
+                ErrorMessage("Internal Error");
+                System.exit(2);
             }
-
-        } catch (ConnectException Exception) { // Unsuccessful connection attempt
-            initialFrame.getContentPane().removeAll();
-            initialFrame.add(getJLabel("Server connection refused. Please check and try again."));
-            Exception.printStackTrace();
-        } catch (EOFException Exception){ // Server disconnection
-            initialFrame.getContentPane().removeAll();
-            initialFrame.add(getJLabel("Server connection lost. Please check try again."));
-            initialFrame.setVisible(true);
-            Exception.printStackTrace();
+        } catch (ConnectException exception) {
+            ErrorMessage("Unsuccessful Connection Attempt");
+            System.exit(1);
+        } catch (EOFException exception) {
+            ErrorMessage("Server Disconnection");
+            System.exit(1);
+        } catch (IOException exception) { // Exception throws by socket object methods.
+            ErrorMessage("Internal Error");
+            System.exit(2);
         }
-        catch(UnknownHostException Exception) {
-            Exception.printStackTrace();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
     }
 
-    private static JFrame getInitialFrame(){
-        JFrame initialFrame = new JFrame();
-        initialFrame.setLocation(40,70);
-        initialFrame.setTitle("Dictionary");
+    private static void ErrorMessage(String exception){
 
-        JPanel contentPanel = new JPanel();
-        contentPanel.setPreferredSize(new Dimension(480, 360));
+        String errorMsg = "Error: " + exception + ". ";
 
-        // border
-        Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
-        contentPanel.setBorder(padding);
+        switch (exception){
+            case "Wrong Number of Parameters":
+                errorMsg += "It was expected at least two arguments, port number (integer) " +
+                        "and dictionary name (string).";
+                break;
+            case "Wrong Input Type for Port Number":
+                errorMsg += "It was expected an integer number for the port argument.";
+                break;
+            case "Unsuccessful Connection Attempt":
+                errorMsg += "Server connection refused, please check and try again.";
+                break;
+            case "Server Disconnection":
+                errorMsg +="Server connection lost, please and check try again.";
+                break;
+            case "Internal Error":
+                errorMsg +="The program will close.";
+                break;
+            default:
+                System.out.println("No tracked error.");
 
-        // Text
-        contentPanel.add(getJLabel("Connecting to server..."));
-
-        //JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
-        //separator.setMaximumSize( new Dimension(Integer.MAX_VALUE, 1) );
-        //contentPanel.add(separator);
-
-        initialFrame.setContentPane(contentPanel);
-        initialFrame.pack();
-
-        return initialFrame;
-    }
-
-    private static JLabel getJLabel(String text) {
-        JLabel label = new JLabel();
-        label.setText(text);
-        label.setFont(new Font("", Font.PLAIN, 18));
-
-        return label;
+        }
+        JOptionPane.showMessageDialog(new JFrame(),errorMsg ,"Error", JOptionPane.ERROR_MESSAGE);
     }
 }

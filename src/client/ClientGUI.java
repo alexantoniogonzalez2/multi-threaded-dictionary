@@ -6,9 +6,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
+
 import java.io.ObjectOutputStream;
 
+import java.io.IOException;
 
 public class ClientGUI extends JFrame {
     private JPanel mainPanel;
@@ -37,10 +38,11 @@ public class ClientGUI extends JFrame {
         queryButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (queryField.getText().equals("")) {
+                String inputText = queryField.getText().replace(":","");
+                if (inputText.equals("")) {
                     queryResult.setText("Please enter a word for querying!");
                 } else {
-                    Message message = new Message("query", queryField.getText(), "");
+                    Message message = new Message("query", inputText, "");
                     sendMessage(message, out);
                 }
             }
@@ -48,12 +50,14 @@ public class ClientGUI extends JFrame {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (addWordField.getText().equals("")){
+                String inputText = addWordField.getText().replace(":","");
+                String inputMeaning = addMeaningField.getText().replace(":","");
+                if (inputText.equals("")){
                     addResult.setText("Please enter a word for adding!");
-                } else if (addMeaningField.getText().equals("")) {
-                    addResult.setText("Please enter a meaning for adding!");
+                } else if (inputMeaning.equals("")) {
+                    addResult.setText("Please enter a meaning for the word!");
                 } else {
-                    Message message = new Message("add", addWordField.getText(), addMeaningField.getText());
+                    Message message = new Message("add", inputText, inputMeaning);
                     sendMessage(message, out);
                 }
             }
@@ -61,15 +65,16 @@ public class ClientGUI extends JFrame {
         removeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (removeField.getText().equals("")){
+                String inputText = removeField.getText().replace(":","");
+                if (inputText.equals("")){
                     removeResult.setText("Please enter a word for deleting!");
                 } else {
-                    Message message = new Message("remove", removeField.getText(),"");
+                    Message message = new Message("remove", inputText,"");
                     sendMessage(message, out);
                 }
             }
         });
-    };
+    }
 
     private void sendMessage(Message message,ObjectOutputStream out){
         try {
@@ -105,6 +110,7 @@ public class ClientGUI extends JFrame {
                 removeResult.setText("This word does not exist!");
                 break;
             default:
+                System.out.println("Unknown type message.");
                 break;
         }
     }
