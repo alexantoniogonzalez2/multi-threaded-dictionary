@@ -12,11 +12,9 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.net.BindException;
 
-
-
 public class DictionaryServer {
 
-    // Identifies the user number connected
+    // Identifies the user connected
     private static int clients = 0;
 
     /**
@@ -32,15 +30,17 @@ public class DictionaryServer {
             port = Integer.parseInt(args[0]);
             fileName = args[1];
         } catch (ArrayIndexOutOfBoundsException Exception ){
-            ErrorInfo("Wrong Number of Parameters");
+            errorInfo("Wrong Number of Parameters");
             System.exit(1);
         } catch (NumberFormatException Exception){
-            ErrorInfo("Wrong Input Type for Port Number");
+            errorInfo("Wrong Input Type for Port Number");
             System.exit(1);
         }
 
         // Shared dictionary
         Dictionary dictionary = new Dictionary(fileName);
+        Runtime.getRuntime().addShutdownHook(new Thread(dictionary::saveDictionary));
+
         // Socket factory
         ServerSocketFactory factory = ServerSocketFactory.getDefault();
 
@@ -58,10 +58,10 @@ public class DictionaryServer {
                 thread.start();
             }
         } catch (IllegalArgumentException exception){
-            ErrorInfo("Wrong Port Number");
+            errorInfo("Wrong Port Number");
             System.exit(1);
         } catch (BindException exception) {
-            ErrorInfo("Port Already in Use");
+            errorInfo("Port Already in Use");
             System.exit(1);
         } catch (IOException exception) { // Exception throws by createServerSocket method.
             exception.printStackTrace();
@@ -86,7 +86,7 @@ public class DictionaryServer {
             try {
                 while ((clientMessage = (Message)in.readObject()) != null){
 
-                    serverAnswer = clientMessage.ProcessMessage(dictionary);
+                    serverAnswer = clientMessage.generateServerMessage(dictionary);
                     System.out.println("Message from client " + clients);
 
 
@@ -98,13 +98,14 @@ public class DictionaryServer {
                 exception.printStackTrace();
             }
         } catch (EOFException exception) {
-            ErrorInfo("Client Closes Connection");
+            errorInfo("Client Closes Connection");
+            dictionary.saveDictionary();
         } catch (IOException exception) { // Exception throws by socket object methods.
             exception.printStackTrace();
         }
     }
 
-    private static void ErrorInfo(String exception){
+    protected static void errorInfo(String exception){
 
         String output = "Error: " + exception + ". ";
 
@@ -124,11 +125,12 @@ public class DictionaryServer {
                 output += "The port is already in use. Please try with other number.";
                 break;
             case "Client Closes Connection":
-                output += "The client " + clients + " suddenly closed the connection.";
+                output += "The client " + clients + " has closed the connection.";
+                output = output.replace("Error: ", "");
                 break;
             default:
                 output += "No tracked error.";
         }
-        System.out.println(output);
+        System.out.print(output);
     }
 }

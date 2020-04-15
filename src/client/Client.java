@@ -23,10 +23,10 @@ public class Client {
             ip = args[0];
             port = Integer.parseInt(args[1]);
         } catch (ArrayIndexOutOfBoundsException Exception ){
-            ErrorMessage("Wrong Number of Parameters");
+            errorMessage("Wrong Number of Parameters");
             System.exit(1);
         } catch (NumberFormatException Exception){
-            ErrorMessage("Wrong Input Type for Port Number");
+            errorMessage("Wrong Input Type for Port Number");
             System.exit(1);
         }
 
@@ -49,29 +49,27 @@ public class Client {
                 while ((serverMsg = (Message) in.readObject()) != null )
                     clientGUI.processServerMessage(serverMsg);
 
-                socket.close();
-                System.out.println("Socket close");
             } catch (ClassNotFoundException exception) { // Exception throws by readObject method.
-                ErrorMessage("Internal Error");
+                errorMessage("Internal Error");
                 System.exit(2);
             }
         } catch (ConnectException exception) {
-            ErrorMessage("Unsuccessful Connection Attempt");
+            errorMessage("Unsuccessful Connection Attempt");
             System.exit(1);
         } catch (EOFException exception) {
-            ErrorMessage("Server Disconnection");
+            errorMessage("Server Disconnection");
             System.exit(1);
         } catch (IOException exception) { // Exception throws by socket object methods.
-            ErrorMessage("Internal Error");
+            errorMessage("Internal Error");
             System.exit(2);
         }
     }
 
-    private static void ErrorMessage(String exception){
+    protected static void errorMessage(String exception){
 
         String errorMsg = "Error: " + exception + ". ";
 
-        switch (exception){
+        switch (exception) {
             case "Wrong Number of Parameters":
                 errorMsg += "It was expected at least two arguments, port number (integer) " +
                         "and dictionary name (string).";

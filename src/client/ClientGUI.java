@@ -1,5 +1,6 @@
 package client;
 
+import org.junit.platform.commons.util.StringUtils;
 import utilities.Message;
 
 import javax.swing.*;
@@ -29,60 +30,104 @@ public class ClientGUI extends JFrame {
 
     public ClientGUI(String title, ObjectOutputStream out){
         super(title);
+        mainPanel.setPreferredSize(new Dimension(500, 380));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocation(40,70);
-        mainPanel.setPreferredSize(new Dimension(480, 360));
         this.setContentPane(mainPanel);
         this.pack();
 
-        queryButton.addActionListener(new ActionListener() {
+        String allowed = "[a-zA-Z0-9áéíóúàèìòùäëïöü. ]+";
+
+        class queryActionListener implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String inputText = queryField.getText().replace(":","");
-                if (inputText.equals("")) {
-                    queryResult.setText("Please enter a word for querying!");
-                } else {
-                    Message message = new Message("query", inputText, "");
-                    sendMessage(message, out);
-                }
+                String inputText = queryField.getText();
+                boolean check = inputText.matches(allowed);
+
+                if (inputText.equals(""))
+                    Warning("empty_word");
+                else if (!check)
+                    Warning("restricted_character");
+                else
+                    sendMessage("query", inputText, "", out);
+
             }
-        });
-        addButton.addActionListener(new ActionListener() {
+        }
+        queryActionListener queryListener = new queryActionListener();
+        queryField.addActionListener(queryListener);
+        queryButton.addActionListener(queryListener);
+
+        class AddWordActionListener implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String inputText = addWordField.getText().replace(":","");
-                String inputMeaning = addMeaningField.getText().replace(":","");
-                if (inputText.equals("")){
-                    addResult.setText("Please enter a word for adding!");
-                } else if (inputMeaning.equals("")) {
-                    addResult.setText("Please enter a meaning for the word!");
-                } else {
-                    Message message = new Message("add", inputText, inputMeaning);
-                    sendMessage(message, out);
-                }
+                String inputText = addWordField.getText();
+                String inputMeaning = addMeaningField.getText();
+                boolean checkWord = inputText.matches(allowed);
+                boolean checkMeaning = inputMeaning.matches(allowed);
+
+                if (inputText.equals(""))
+                    Warning("empty_word");
+                else if (!checkWord)
+                    Warning("restricted_character");
+                else if (inputMeaning.equals(""))
+                    Warning("empty_meaning");
+                else if (!checkMeaning)
+                    Warning("restricted_character");
+                else
+                    sendMessage("add", inputText, inputMeaning, out);
+
             }
-        });
-        removeButton.addActionListener(new ActionListener() {
+        }
+        AddWordActionListener addListener = new AddWordActionListener();
+        addButton.addActionListener(addListener);
+        addWordField.addActionListener(addListener);
+        addMeaningField.addActionListener(addListener);
+
+        class RemoveWordActionListener implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String inputText = removeField.getText().replace(":","");
-                if (inputText.equals("")){
-                    removeResult.setText("Please enter a word for deleting!");
-                } else {
-                    Message message = new Message("remove", inputText,"");
-                    sendMessage(message, out);
-                }
+                String inputText = removeField.getText();
+                boolean check = inputText.matches(allowed);
+
+                if (inputText.equals(""))
+                    Warning("empty_word");
+                if (!check)
+                    Warning("restricted_character");
+                else
+                    sendMessage("remove", inputText, "", out);
             }
-        });
+        }
+        RemoveWordActionListener RemoveListener = new RemoveWordActionListener();
+        removeButton.addActionListener(RemoveListener);
+        removeField.addActionListener(RemoveListener);
     }
 
-    private void sendMessage(Message message,ObjectOutputStream out){
+    private void sendMessage(String type, String word, String text, ObjectOutputStream out){
+        String capitalizedWord = word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
+        Message message = new Message(type, capitalizedWord, text);
         try {
             out.writeObject(message);
             out.flush();
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
+    }
+
+    private void Warning (String type) {
+        String text = "";
+        switch (type) {
+            case "empty_word":
+                text = "Please insert a word!";
+                break;
+            case "empty_meaning":
+                text = "Please insert a meaning!";
+                break;
+            case "restricted_character":
+                text = "You have inserted restricted characters. Only alphanumeric characters are allowed.";
+                break;
+            default:
+        }
+        JOptionPane.showMessageDialog(new JFrame(), text, "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
     public void processServerMessage(Message message){
@@ -92,7 +137,10 @@ public class ClientGUI extends JFrame {
 
         switch(type){
             case "meaning":
-                this.queryResult.setText("Meaning: " + text);
+                this.queryResult.setText("<html>Meaning: " + text+"<html>");
+                break;
+            case "similar_words":
+                queryResult.setText("Word not found. Similar words: " + text);
                 break;
             case "unknown_word":
                 queryResult.setText("Word not found in the dictionary!");

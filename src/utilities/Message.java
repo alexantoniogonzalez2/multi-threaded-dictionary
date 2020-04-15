@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package utilities;
 import server.Dictionary;
 
@@ -36,7 +32,6 @@ public class Message implements Serializable{
         return text;
     }
 
-
     // Used for testing
     @Override
     public String toString() {
@@ -47,7 +42,7 @@ public class Message implements Serializable{
                 '}';
     }
 
-    public Message ProcessMessage(Dictionary dictionary){
+    public Message generateServerMessage(Dictionary dictionary){
         Message answer;
         Boolean word_exists;
 
@@ -56,8 +51,13 @@ public class Message implements Serializable{
                 String meaning = dictionary.getMeaning(word);
                 if (meaning != null)
                     answer = new Message("meaning",word,meaning);
-                else
-                    answer = new Message("unknown_word",word,"");
+                else {
+                    String similarWords = dictionary.getSimilarWords(word);
+                    if (similarWords != "")
+                        answer = new Message("similar_words",word,similarWords);
+                    else
+                        answer = new Message("unknown_word",word,"");
+                }
                 break;
             case "add":
                 word_exists = dictionary.checkWord(word);
