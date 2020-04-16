@@ -35,13 +35,13 @@ public class Client {
             Socket socket = new Socket(ip, port);
             System.out.println("Connection established");
 
-            // Create the "Input Stream" and "Output Stream" objects for communicating
-            // with the client, directly through InputStream and OutputStream classes.
-            // Detailed alternative form: InputStream = clientSocket.getInputStream()
+            // Create objects for communicating with the client.
+            // Detailed alternative: InputStream = clientSocket.getInputStream()
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-            ClientGUI clientGUI = new ClientGUI("Dictionary", out);
+            String availableDict = availableDictionaries(in);
+            ClientGUI clientGUI = new ClientGUI("Dictionary", out, availableDict);
             clientGUI.setVisible(true);
 
             Message serverMsg;
@@ -63,6 +63,18 @@ public class Client {
             errorMessage("Internal Error");
             System.exit(2);
         }
+    }
+
+    private static String availableDictionaries (ObjectInputStream in) {
+        Message serverResponse = null;
+        try {
+            serverResponse = (Message) in.readObject();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return serverResponse.getText();
     }
 
     protected static void errorMessage(String exception){

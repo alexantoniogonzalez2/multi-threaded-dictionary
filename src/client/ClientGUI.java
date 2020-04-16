@@ -1,6 +1,5 @@
 package client;
 
-import org.junit.platform.commons.util.StringUtils;
 import utilities.Message;
 
 import javax.swing.*;
@@ -11,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.ObjectOutputStream;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 public class ClientGUI extends JFrame {
     private JPanel mainPanel;
@@ -27,10 +27,42 @@ public class ClientGUI extends JFrame {
     private JTextField removeField;
     private JButton removeButton;
     private JLabel removeResult;
+    private JRadioButton radioButton1;
+    private JRadioButton radioButton2;
+    private JRadioButton radioButton3;
+    private JRadioButton radioButton4;
+    private JRadioButton radioButton5;
+    private ButtonGroup dictionaries = new ButtonGroup();
+    private JLabel dictionariesLabel;
+    private JLabel dictionariesMessage;
 
-    public ClientGUI(String title, ObjectOutputStream out){
+    public ClientGUI(String title, ObjectOutputStream out, String availableDict){
+
         super(title);
-        mainPanel.setPreferredSize(new Dimension(500, 380));
+
+        // Adding dictionaries dynamically
+        this.dictionaries.add(this.radioButton1);
+        this.dictionaries.add(this.radioButton2);
+        this.dictionaries.add(this.radioButton3);
+        this.dictionaries.add(this.radioButton4);
+        this.dictionaries.add(this.radioButton5);
+
+        String[] languages = (availableDict.substring(1,availableDict.length()-1)).replaceAll("\\s","").split(",");
+        int max = languages.length;
+        int count = 0;
+        for (Enumeration<AbstractButton> buttons = dictionaries.getElements(); buttons.hasMoreElements();) {
+            AbstractButton button = buttons.nextElement();
+            if (count < max) {
+                button.setText(languages[count]);
+                button.setActionCommand(languages[count]);
+            }
+            else {
+                button.setVisible(false);
+            }
+            count++;
+        }
+
+        mainPanel.setPreferredSize(new Dimension(620, 530));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocation(40,70);
         this.setContentPane(mainPanel);
@@ -49,7 +81,7 @@ public class ClientGUI extends JFrame {
                 else if (!check)
                     Warning("restricted_character");
                 else
-                    sendMessage("query", inputText, "", out);
+                    sendMessage("query", inputText, "", out, dictionaries.getSelection().getActionCommand());
 
             }
         }
@@ -74,7 +106,7 @@ public class ClientGUI extends JFrame {
                 else if (!checkMeaning)
                     Warning("restricted_character");
                 else
-                    sendMessage("add", inputText, inputMeaning, out);
+                    sendMessage("add", inputText, inputMeaning, out, dictionaries.getSelection().getActionCommand());
 
             }
         }
@@ -94,7 +126,7 @@ public class ClientGUI extends JFrame {
                 if (!check)
                     Warning("restricted_character");
                 else
-                    sendMessage("remove", inputText, "", out);
+                    sendMessage("remove", inputText, "", out, dictionaries.getSelection().getActionCommand());
             }
         }
         RemoveWordActionListener RemoveListener = new RemoveWordActionListener();
@@ -102,9 +134,9 @@ public class ClientGUI extends JFrame {
         removeField.addActionListener(RemoveListener);
     }
 
-    private void sendMessage(String type, String word, String text, ObjectOutputStream out){
+    private void sendMessage(String type, String word, String text, ObjectOutputStream out, String language){
         String capitalizedWord = word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
-        Message message = new Message(type, capitalizedWord, text);
+        Message message = new Message(type, capitalizedWord, text, language);
         try {
             out.writeObject(message);
             out.flush();
@@ -134,6 +166,7 @@ public class ClientGUI extends JFrame {
         String type = message.getType();
         String word = message.getWord();
         String text = message.getText();
+
 
         switch(type){
             case "meaning":

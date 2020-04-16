@@ -11,6 +11,7 @@ import java.io.IOException;
 
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
+import utilities.Message;
 
 
 /**
@@ -25,12 +26,15 @@ public class Dictionary {
 
     //
     private String fileName;
+    private String language;
 
     public Dictionary (String fileName) {
 
         this.fileName = fileName;
         File myObj = new File(fileName + ".txt");
         try (Scanner myReader = new Scanner(myObj)) {
+            String languageLine = myReader.nextLine();
+            this.language = languageLine.replaceAll("\\s+","");
             while (myReader.hasNextLine()) {
                 String line = myReader.nextLine();
                 try {
@@ -47,6 +51,10 @@ public class Dictionary {
         }
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
     public void addWord (String word, String meaning) {
         this.words.put(word, meaning);
     }
@@ -57,6 +65,53 @@ public class Dictionary {
 
     public String getMeaning (String word){
         return this.words.get(word);
+    }
+
+    public Message generateAnswer(Message message){
+
+        Message answer;
+        Boolean wordExists;
+        String type = message.getType();
+        String word = message.getWord();
+        String text = message.getText();
+        String language = message.getLanguage();
+        System.out.println(message.toString());
+
+        switch(type){
+            case "query":
+                String meaning = this.getMeaning(word);
+                if (meaning != null)
+                    answer = new Message("meaning",word,meaning,language);
+                else {
+                    String similarWords = this.getSimilarWords(word);
+                    if (similarWords != "")
+                        answer = new Message("similar_words",word,similarWords,language);
+                    else
+                        answer = new Message("unknown_word",word,"",language);
+                }
+                break;
+            case "add":
+                wordExists = this.checkWord(word);
+                if (wordExists) {
+                    answer = new Message("word_already_exists", word, "",language);
+                } else {
+                    this.addWord(word, text);
+                    answer = new Message("added", word, "",language);
+                }
+                break;
+            case "remove":
+                wordExists = this.checkWord(word);
+                if (wordExists) {
+                    this.removeWord(word);
+                    answer = new Message("removed", word, "",language);
+                } else {
+                    answer = new Message("word_does_not_exist", word, "",language);
+                }
+                break;
+            default:
+                answer = new Message("unknown_option", word, "",language);
+        }
+        return answer;
     }
 
     public String getSimilarWords (String word){
@@ -79,6 +134,7 @@ public class Dictionary {
         return similarWords;
     }
 
+
     public boolean checkWord (String word) {
         return this.words.containsKey(word);
     }
@@ -86,6 +142,7 @@ public class Dictionary {
     public void saveDictionary () {
         try {
             FileWriter writer = new FileWriter(fileName + ".txt");
+            writer.write(this.language + "\n");
             for (HashMap.Entry<String, String> entry : words.entrySet()) {
                 String word = entry.getKey();
                 String meaning = entry.getValue();

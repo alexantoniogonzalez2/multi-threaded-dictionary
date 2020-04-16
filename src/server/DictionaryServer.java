@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.io.EOFException;
 import java.net.BindException;
+import java.util.HashMap;
 
 public class DictionaryServer {
 
@@ -23,23 +24,8 @@ public class DictionaryServer {
     public static void main(String[] args) {
         
         // Declare the port number and the filename
-        int port = 0;
-        String fileName = "";
-                
-        try {
-            port = Integer.parseInt(args[0]);
-            fileName = args[1];
-        } catch (ArrayIndexOutOfBoundsException Exception ){
-            errorInfo("Wrong Number of Parameters");
-            System.exit(1);
-        } catch (NumberFormatException Exception){
-            errorInfo("Wrong Input Type for Port Number");
-            System.exit(1);
-        }
-
-        // Shared dictionary
-        Dictionary dictionary = new Dictionary(fileName);
-        Runtime.getRuntime().addShutdownHook(new Thread(dictionary::saveDictionary));
+        int port = getPort(args);
+        HashMap<String, Dictionary> dictionaries = getDictionaries(args);
 
         // Socket factory
         ServerSocketFactory factory = ServerSocketFactory.getDefault();
@@ -54,7 +40,7 @@ public class DictionaryServer {
                 System.out.println("New connection: client " + clients);
 
                 // Start a new thread for a connection
-                Thread thread = new Thread(() -> serveClient(client, dictionary));
+                Thread thread = new Thread(() -> serveClient(client, dictionaries));
                 thread.start();
             }
         } catch (IllegalArgumentException exception){
@@ -69,26 +55,31 @@ public class DictionaryServer {
         }
     }
 
-    private static void serveClient(Socket clientSocket, Dictionary dictionary){
+    private static void serveClient(Socket clientSocket, HashMap<String,Dictionary> dictionaries){
 
         // Try clause needed for socket object manipulation.
         try {
-
-            // Create the "Input Stream" and "Output Stream" objects for communicating
-            // with the client, directly through InputStream and OutputStream classes.
-            // Detailed alternative form: InputStream = clientSocket.getInputStream()
+            // Create objects for communicating with the client.
+            // Detailed alternative: InputStream = clientSocket.getInputStream()
             ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
             ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
 
+            String availableDict = dictionaries.keySet().toString();
+            Message firstMessage = new Message("available_dict","",availableDict,"");
+            out.writeObject(firstMessage);
+            out.flush();
+
             //Read the message from the client and reply
             Message clientMessage, serverAnswer;
-
             try {
                 while ((clientMessage = (Message)in.readObject()) != null){
-
-                    serverAnswer = clientMessage.generateServerMessage(dictionary);
+                    String messageLanguage = clientMessage.getLanguage();
+                    System.out.println(messageLanguage);
+                    System.out.println(dictionaries.keySet().toString());
+                    //Dictionary dict = dictionaries.get(messageLanguage);
+                    //System.out.println(dict.toString());
+                    serverAnswer = (dictionaries.get(messageLanguage)).generateAnswer(clientMessage);
                     System.out.println("Message from client " + clients);
-
 
                     out.writeObject(serverAnswer);
                     out.flush();
@@ -99,10 +90,61 @@ public class DictionaryServer {
             }
         } catch (EOFException exception) {
             errorInfo("Client Closes Connection");
-            dictionary.saveDictionary();
+            // All the dictionaries are saved if a client closes the connection.
+            dictionaries.forEach((String language, Dictionary dictionary) -> {
+                dictionary.saveDictionary();
+            });
+            // The program continues...
         } catch (IOException exception) { // Exception throws by socket object methods.
             exception.printStackTrace();
+            // The program continues...
         }
+    }
+
+    private static int getPort (String[] args){
+        int port = 0;
+
+        try {
+            port = Integer.parseInt(args[0]);
+        } catch (ArrayIndexOutOfBoundsException Exception) {
+            errorInfo("Wrong Number of Parameters");
+            System.exit(1);
+        } catch (NumberFormatException Exception) {
+            errorInfo("Wrong Input Type for Port Number");
+            System.exit(1);
+        }
+        return port;
+    }
+
+    private static HashMap<String, Dictionary> getDictionaries (String[] args) {
+
+        String[] fileName = new String[5];
+
+        try {
+            fileName[0] = args[1];
+        } catch (ArrayIndexOutOfBoundsException Exception) {
+            errorInfo("Wrong Number of Parameters");
+            System.exit(1);
+        }
+
+        try {
+            for (int i = 1; i<5 ; i++)
+                fileName[i] = args[i+1];
+        } catch (ArrayIndexOutOfBoundsException exception) {
+            // The program continues..
+        }
+
+        // Shared dictionaries
+        HashMap<String, Dictionary> dictionaries = new HashMap();
+        for (int i = 0; i<5 ; i++)
+            if (fileName[i] != null){
+                Dictionary dictionary = new Dictionary(fileName[i]);
+                dictionaries.put(dictionary.getLanguage(), dictionary);
+                Runtime.getRuntime().addShutdownHook(new Thread(dictionary::saveDictionary));
+            }
+
+        return dictionaries;
+
     }
 
     protected static void errorInfo(String exception){
