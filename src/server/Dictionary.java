@@ -1,32 +1,25 @@
 
 package server;
+import utilities.Message;
 
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.io.File;  // Import the File class
-import java.io.FileNotFoundException;  // Import this class to handle errors
 import java.util.Scanner; // Import the Scanner class to read text files
 
 import java.io.IOException;
+import java.io.FileNotFoundException;  // Import this class to handle errors
 
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
-import utilities.Message;
 
-
-/**
- *
- * @author alex
- */
 public class Dictionary {
 
-    // Create a HashMap object for the words of dictionary
-    private HashMap<String, String> words = new HashMap();
-
-
-    //
-    private String fileName;
+    // Attributes
+    private final String fileName;
     private String language;
+    // Create a HashMap object for the words of dictionary.
+    private HashMap<String, String> words = new HashMap();
 
     public Dictionary (String fileName) {
 
@@ -41,12 +34,12 @@ public class Dictionary {
                     String[] splitLine = line.split(":");
                     words.put(splitLine[0], splitLine[1]);
                 } catch (Exception ArrayIndexOutOfBoundsException){
-                    ErrorInfo("Problem With Format");
+                    errorInfo("Problem With Format");
                     System.exit(1);
                 }
             }
         } catch (FileNotFoundException exception) {
-            ErrorInfo("File Not Found");
+            errorInfo("File Not Found");
             System.exit(1);
         }
     }
@@ -67,7 +60,11 @@ public class Dictionary {
         return this.words.get(word);
     }
 
-    public Message generateAnswer(Message message){
+    public boolean checkWord (String word) {
+        return this.words.containsKey(word);
+    }
+
+    public Message generateAnswer (Message message) {
 
         Message answer;
         Boolean wordExists;
@@ -84,7 +81,7 @@ public class Dictionary {
                     answer = new Message("meaning",word,meaning,language);
                 else {
                     String similarWords = this.getSimilarWords(word);
-                    if (similarWords != "")
+                    if (!similarWords.equals(""))
                         answer = new Message("similar_words",word,similarWords,language);
                     else
                         answer = new Message("unknown_word",word,"",language);
@@ -128,33 +125,13 @@ public class Dictionary {
             }
         }
 
-        if (similarWords != "")
+        if (!similarWords.equals(""))
             similarWords = similarWords.substring(0, similarWords.length()-2);
 
         return similarWords;
     }
 
-
-    public boolean checkWord (String word) {
-        return this.words.containsKey(word);
-    }
-    
-    public void saveDictionary () {
-        try {
-            FileWriter writer = new FileWriter(fileName + ".txt");
-            writer.write(this.language + "\n");
-            for (HashMap.Entry<String, String> entry : words.entrySet()) {
-                String word = entry.getKey();
-                String meaning = entry.getValue();
-                writer.write(word + ":" + meaning + "\n");
-            }
-            writer.close();
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        }
-    }
-    
-    private static void ErrorInfo (String exception) {
+    private static void errorInfo (String exception) {
 
         String output = "Error: " + exception + ". ";
 
@@ -169,6 +146,21 @@ public class Dictionary {
                 output += "No tracked error.";
         }
         System.out.println(output);
+    }
+
+    public void saveDictionary () {
+        try {
+            FileWriter writer = new FileWriter(fileName + ".txt");
+            writer.write(this.language + "\n");
+            for (HashMap.Entry<String, String> entry : words.entrySet()) {
+                String word = entry.getKey();
+                String meaning = entry.getValue();
+                writer.write(word + ":" + meaning + "\n");
+            }
+            writer.close();
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     @Override

@@ -13,7 +13,7 @@ import java.io.EOFException;
 import java.net.BindException;
 import java.util.HashMap;
 
-public class DictionaryServer {
+public class Server {
 
     // Identifies the user connected
     private static int clients = 0;
@@ -74,10 +74,6 @@ public class DictionaryServer {
             try {
                 while ((clientMessage = (Message)in.readObject()) != null){
                     String messageLanguage = clientMessage.getLanguage();
-                    System.out.println(messageLanguage);
-                    System.out.println(dictionaries.keySet().toString());
-                    //Dictionary dict = dictionaries.get(messageLanguage);
-                    //System.out.println(dict.toString());
                     serverAnswer = (dictionaries.get(messageLanguage)).generateAnswer(clientMessage);
                     System.out.println("Message from client " + clients);
 

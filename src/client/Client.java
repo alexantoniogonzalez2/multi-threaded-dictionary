@@ -13,7 +13,7 @@ import javax.swing.*;
 
 public class Client {
 
-    public static void main(String[] args){
+    public static void main (String[] args) {
 
         // Declare the server ip and the port number
         String ip = "";
@@ -77,7 +77,7 @@ public class Client {
         return serverResponse.getText();
     }
 
-    protected static void errorMessage(String exception){
+    protected static void errorMessage (String exception) {
 
         String errorMsg = "Error: " + exception + ". ";
 

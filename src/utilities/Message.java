@@ -1,6 +1,5 @@
 
 package utilities;
-import server.Dictionary;
 
 import java.io.Serializable;
 
@@ -9,7 +8,7 @@ import java.io.Serializable;
  * @author alex
  */
 // must implement Serializable in order to be sent
-public class Message implements Serializable{
+public class Message implements Serializable {
     private final String type;
     private final String word;
     private final String text;

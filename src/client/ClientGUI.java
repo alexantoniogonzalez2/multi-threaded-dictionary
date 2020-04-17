@@ -36,7 +36,7 @@ public class ClientGUI extends JFrame {
     private JLabel dictionariesLabel;
     private JLabel dictionariesMessage;
 
-    public ClientGUI(String title, ObjectOutputStream out, String availableDict){
+    public ClientGUI (String title, ObjectOutputStream out, String availableDict) {
 
         super(title);
 
@@ -74,14 +74,15 @@ public class ClientGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String inputText = queryField.getText();
+                String selectedLng = dictionaries.getSelection().getActionCommand();
                 boolean check = inputText.matches(allowed);
 
                 if (inputText.equals(""))
-                    Warning("empty_word");
+                    showWarning("empty_word");
                 else if (!check)
-                    Warning("restricted_character");
+                    showWarning("restricted_character");
                 else
-                    sendMessage("query", inputText, "", out, dictionaries.getSelection().getActionCommand());
+                    sendMessage(out,"query", inputText, "", selectedLng);
 
             }
         }
@@ -94,19 +95,20 @@ public class ClientGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String inputText = addWordField.getText();
                 String inputMeaning = addMeaningField.getText();
+                String selectedLng = dictionaries.getSelection().getActionCommand();
                 boolean checkWord = inputText.matches(allowed);
                 boolean checkMeaning = inputMeaning.matches(allowed);
 
                 if (inputText.equals(""))
-                    Warning("empty_word");
+                    showWarning("empty_word");
                 else if (!checkWord)
-                    Warning("restricted_character");
+                    showWarning("restricted_character");
                 else if (inputMeaning.equals(""))
-                    Warning("empty_meaning");
+                    showWarning("empty_meaning");
                 else if (!checkMeaning)
-                    Warning("restricted_character");
+                    showWarning("restricted_character");
                 else
-                    sendMessage("add", inputText, inputMeaning, out, dictionaries.getSelection().getActionCommand());
+                    sendMessage(out, "add", inputText, inputMeaning, selectedLng);
 
             }
         }
@@ -119,14 +121,15 @@ public class ClientGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String inputText = removeField.getText();
+                String selectedLng = dictionaries.getSelection().getActionCommand();
                 boolean check = inputText.matches(allowed);
 
                 if (inputText.equals(""))
-                    Warning("empty_word");
+                    showWarning("empty_word");
                 if (!check)
-                    Warning("restricted_character");
+                    showWarning("restricted_character");
                 else
-                    sendMessage("remove", inputText, "", out, dictionaries.getSelection().getActionCommand());
+                    sendMessage(out, "remove", inputText, "", selectedLng);
             }
         }
         RemoveWordActionListener RemoveListener = new RemoveWordActionListener();
@@ -134,7 +137,7 @@ public class ClientGUI extends JFrame {
         removeField.addActionListener(RemoveListener);
     }
 
-    private void sendMessage(String type, String word, String text, ObjectOutputStream out, String language){
+    private void sendMessage (ObjectOutputStream out, String type, String word, String text, String language) {
         String capitalizedWord = word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
         Message message = new Message(type, capitalizedWord, text, language);
         try {
@@ -145,7 +148,7 @@ public class ClientGUI extends JFrame {
         }
     }
 
-    private void Warning (String type) {
+    private void showWarning (String type) {
         String text = "";
         switch (type) {
             case "empty_word":
@@ -162,7 +165,7 @@ public class ClientGUI extends JFrame {
         JOptionPane.showMessageDialog(new JFrame(), text, "Warning", JOptionPane.WARNING_MESSAGE);
     }
 
-    public void processServerMessage(Message message){
+    public void processServerMessage (Message message) {
         String type = message.getType();
         String word = message.getWord();
         String text = message.getText();
