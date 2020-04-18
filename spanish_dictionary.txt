@@ -1,0 +1,9 @@
+Español
+pera:fruta
+manzana:fruta
+cinco:número
+naranja:fruta
+uno:número
+dos:número
+tres:número
+cuatro:número

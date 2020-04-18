@@ -1,16 +1,17 @@
+// Author: Alex Gonzalez Login ID: aagonzalez
+// Purpose: Assignment 1 - COMP90015: Distributed Systems
 
 package server;
 import utilities.Message;
-
+// Files managing libraries.
 import java.io.FileWriter;
 import java.util.HashMap;
-import java.io.File;  // Import the File class
-import java.util.Scanner; // Import the Scanner class to read text files
-
+import java.io.File;
+import java.util.Scanner;
+// Exception libraries.
 import java.io.IOException;
-import java.io.FileNotFoundException;  // Import this class to handle errors
-
-
+import java.io.FileNotFoundException;
+// Library used to suggest similar words.
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
 public class Dictionary {
@@ -26,8 +27,12 @@ public class Dictionary {
         this.fileName = fileName;
         File myObj = new File(fileName + ".txt");
         try (Scanner myReader = new Scanner(myObj)) {
+
+            // First line for language.
             String languageLine = myReader.nextLine();
             this.language = languageLine.replaceAll("\\s+","");
+
+            // Reading words...
             while (myReader.hasNextLine()) {
                 String line = myReader.nextLine();
                 try {
@@ -64,6 +69,7 @@ public class Dictionary {
         return this.words.containsKey(word);
     }
 
+    // This method generates the proper message required as answer
     public Message generateAnswer (Message message) {
 
         Message answer;
@@ -72,7 +78,6 @@ public class Dictionary {
         String word = message.getWord();
         String text = message.getText();
         String language = message.getLanguage();
-        System.out.println(message.toString());
 
         switch(type){
             case "query":
@@ -80,6 +85,7 @@ public class Dictionary {
                 if (meaning != null)
                     answer = new Message("meaning",word,meaning,language);
                 else {
+                    // If the word is not found, similar words are searched.
                     String similarWords = this.getSimilarWords(word);
                     if (!similarWords.equals(""))
                         answer = new Message("similar_words",word,similarWords,language);
@@ -112,25 +118,31 @@ public class Dictionary {
     }
 
     public String getSimilarWords (String word){
+
         String similarWords = "";
         int count = 0;
         LevenshteinDistance distance = new LevenshteinDistance();
 
+        // It is review all the dictionary (up to three words).
+        // As an improvement, this option could be optional.
         for (HashMap.Entry<String, String> entry : words.entrySet()) {
             if (count == 3)
                 break;
+            // The words with distance 1 or two are selected.
             if (distance.apply(entry.getKey(), word) < 3){
                 similarWords += entry.getKey() + ", ";
                 count++;
             }
         }
 
+        // Just a final string processing.
         if (!similarWords.equals(""))
             similarWords = similarWords.substring(0, similarWords.length()-2);
 
         return similarWords;
     }
 
+    // This method is used for proper error information.
     private static void errorInfo (String exception) {
 
         String output = "Error: " + exception + ". ";
@@ -147,22 +159,28 @@ public class Dictionary {
         }
         System.out.println(output);
     }
-
+    // Method for saving the dictionary with the same filename.
     public void saveDictionary () {
         try {
             FileWriter writer = new FileWriter(fileName + ".txt");
+
+            // First line for language.
             writer.write(this.language + "\n");
+
+            // Saving each word line by line
             for (HashMap.Entry<String, String> entry : words.entrySet()) {
                 String word = entry.getKey();
                 String meaning = entry.getValue();
                 writer.write(word + ":" + meaning + "\n");
             }
             writer.close();
-        } catch (IOException exception) {
+        } catch (IOException exception) { // Exception throws by FileWriter.write method.
             exception.printStackTrace();
+            System.exit(2);
         }
     }
 
+    // Used for testing.
     @Override
     public String toString() {
         return "Dictionary{" +

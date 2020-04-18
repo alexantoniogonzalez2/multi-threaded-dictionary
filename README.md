@@ -1,29 +1,33 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+### Multi-threaded Dictionary ###
+* Version 1.0
 
-### What is this repository for? ###
+### Summary ###
+* This project was developed with Java Development Kit (JDK) 14
+* Framework: IntelliJ IDEA Community Edition 2020.1 
+* GUI: Swing
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+### Executing ###
+* For executing Server JAR file (up to 5 dictionaries):
+    * java –jar DictionaryServer.jar <port> <dictionary-file-1> <dictionary-file-2>  
+* Dictionary files:
+    * Must be txt files
+    * One word-meaning pair by line separated with colon.
+    * First line must have the language.
+* For executing Client JAR file:
+    * java –jar DictionaryClient.jar <server-address> <server-port>
+### Dependencies ###
+* These are the most uncommon libraries utilized:
+    * JUnit Jupiter 5.4.2: for testing. 
+    * Apache Common Text 1.8: for implementation of Levenshtein Distance (similar words). 
 
-### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+### Testing ###
+* 15 tests are provided. It was run with the functionality of IntelliJ. 
 
-### Contribution guidelines ###
+### Owner ###
+* Alex González - aagonzalez@student.unimelb.edu.au
 
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+### GIT Repository (private) 
+* [https://aagonza1@bitbucket.org/aagonza1/multi-threaded-dictionary.git](https://aagonza1@bitbucket.org/aagonza1/multi-threaded-dictionary.git)

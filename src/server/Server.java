@@ -1,45 +1,47 @@
+// Author: Alex Gonzalez Login ID: aagonzalez
+// Purpose: Assignment 1 - COMP90015: Distributed Systems
 
 package server;
 import utilities.Message;
-
+// Sockets libraries.
 import java.net.Socket;
 import java.net.ServerSocket;
 import javax.net.ServerSocketFactory;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
+// Exception libraries.
 import java.io.IOException;
 import java.io.EOFException;
 import java.net.BindException;
 import java.util.HashMap;
 
+// Server class represents the server and includes the main manipulation of sockets and threads.
 public class Server {
 
-    // Identifies the user connected
+    // Maximum number of dictionaries
+    private static final int dictLimit = 5;
+    // Identifies the users connected
     private static int clients = 0;
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         
-        // Declare the port number and the filename
+        // Reading the port number and the filenames
         int port = getPort(args);
         HashMap<String, Dictionary> dictionaries = getDictionaries(args);
 
-        // Socket factory
+        // Socket factory for creating sockets
         ServerSocketFactory factory = ServerSocketFactory.getDefault();
 
         try (ServerSocket server = factory.createServerSocket(port)){
             System.out.println("Waiting for client connections...");
 
-            // Wait for connections.
+            // Listen for connections...
             while (true){
                 Socket client = server.accept();
                 clients++;
-                System.out.println("New connection: client " + clients);
+                System.out.println("New client. Nº: " + clients);
 
-                // Start a new thread for a connection
+                // It started a new thread for each connection.
                 Thread thread = new Thread(() -> serveClient(client, dictionaries));
                 thread.start();
             }
@@ -55,6 +57,7 @@ public class Server {
         }
     }
 
+    // This method represents a Thread instance for managing a socket communication with a client.
     private static void serveClient(Socket clientSocket, HashMap<String,Dictionary> dictionaries){
 
         // Try clause needed for socket object manipulation.
@@ -64,16 +67,20 @@ public class Server {
             ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
             ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
 
+            // First message with the available dictionaries
             String availableDict = dictionaries.keySet().toString();
             Message firstMessage = new Message("available_dict","",availableDict,"");
             out.writeObject(firstMessage);
             out.flush();
 
-            //Read the message from the client and reply
+            // Continuously reading and answering messages from the clients...
             Message clientMessage, serverAnswer;
             try {
                 while ((clientMessage = (Message)in.readObject()) != null){
+
+                    // It is identified the language.
                     String messageLanguage = clientMessage.getLanguage();
+                    // It is asked the answer to the proper dictionary.
                     serverAnswer = (dictionaries.get(messageLanguage)).generateAnswer(clientMessage);
                     System.out.println("Message from client " + clients);
 
@@ -97,6 +104,7 @@ public class Server {
         }
     }
 
+    // Method for reading the port from the arguments.
     private static int getPort (String[] args){
         int port = 0;
 
@@ -112,9 +120,9 @@ public class Server {
         return port;
     }
 
+    // Method for reading the filenames from the arguments.
     private static HashMap<String, Dictionary> getDictionaries (String[] args) {
-
-        String[] fileName = new String[5];
+        String[] fileName = new String[dictLimit];
 
         try {
             fileName[0] = args[1];
@@ -124,25 +132,26 @@ public class Server {
         }
 
         try {
-            for (int i = 1; i<5 ; i++)
+            for (int i = 1; i< dictLimit; i++)
                 fileName[i] = args[i+1];
-        } catch (ArrayIndexOutOfBoundsException exception) {
-            // The program continues..
+        } catch (ArrayIndexOutOfBoundsException exception) { // If there is less than 5 filenames
+            // The program continues...
         }
 
-        // Shared dictionaries
+        // Creating the dictionary objects.
         HashMap<String, Dictionary> dictionaries = new HashMap();
         for (int i = 0; i<5 ; i++)
             if (fileName[i] != null){
                 Dictionary dictionary = new Dictionary(fileName[i]);
                 dictionaries.put(dictionary.getLanguage(), dictionary);
+                // Hook for save each dictionary if the program closes.
                 Runtime.getRuntime().addShutdownHook(new Thread(dictionary::saveDictionary));
             }
 
         return dictionaries;
-
     }
 
+    // This method is used for proper error information.
     protected static void errorInfo(String exception){
 
         String output = "Error: " + exception + ". ";

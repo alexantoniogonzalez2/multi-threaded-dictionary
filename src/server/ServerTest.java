@@ -1,10 +1,13 @@
-package server;
+// Author: Alex Gonzalez Login ID: aagonzalez
+// Purpose: Assignment 1 - COMP90015: Distributed Systems
 
+package server;
+// Testing libraries.
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+// For testing console output.
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 

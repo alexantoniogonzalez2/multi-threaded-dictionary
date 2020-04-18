@@ -1,13 +1,11 @@
+// Author: Alex Gonzalez Login ID: aagonzalez
+// Purpose: Assignment 1 - COMP90015: Distributed Systems
 
 package utilities;
-
 import java.io.Serializable;
 
-/**
- *
- * @author alex
- */
-// must implement Serializable in order to be sent
+/* Message is the class utilized for sending messages between the server and client, defining a message structure.
+    It must to implement Serializable interface to sent the messages through the sockets like objects.*/
 public class Message implements Serializable {
     private final String type;
     private final String word;
@@ -37,7 +35,7 @@ public class Message implements Serializable {
         return language;
     }
 
-    // Used for testing
+    // Used for testing.
     @Override
     public String toString() {
         return "Message{" +

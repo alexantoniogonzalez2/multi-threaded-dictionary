@@ -1,12 +1,12 @@
-package server;
+// Author: Alex Gonzalez Login ID: aagonzalez
+// Purpose: Assignment 1 - COMP90015: Distributed Systems
 
+package server;
+import utilities.Message;
+// Testing libraries.
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import utilities.Message;
-
-import java.io.File;
-import java.io.IOException;
 
 class DictionaryTest {
 
@@ -15,16 +15,16 @@ class DictionaryTest {
     @BeforeEach
     void setUp() {
         // For tests 1 to 3
-        dictionary = new Dictionary("dictionary");
+        dictionary = new Dictionary("test_dictionary");
 
         // For test 4
-        editedDictionary = new Dictionary("dictionary");
+        editedDictionary = new Dictionary("test_dictionary");
         editedDictionary.addWord("one","number");
         editedDictionary.addWord("two","number");
         editedDictionary.addWord("three","number");
     }
 
-    @Test // Test 1
+    @Test // Test 1: add method
     void addWord() {
         dictionary.removeWord("horse");
         dictionary.addWord("horse","animal");
@@ -33,14 +33,14 @@ class DictionaryTest {
         Assertions.assertEquals(meaning,"animal");
     }
 
-    @Test // Test 2
+    @Test // Test 2: remove method
     void removeWord() {
         dictionary.addWord("cat","animal");
         dictionary.removeWord("cat");
         Assertions.assertFalse(dictionary.checkWord("cat"));
     }
 
-    @Test // Test 3
+    @Test // Test 3: checkWord method
     void checkWord() {
         dictionary.removeWord("dog");
         String meaning = dictionary.getMeaning("dog");
@@ -48,14 +48,14 @@ class DictionaryTest {
         Assertions.assertFalse(dictionary.checkWord("dog"));
     }
 
-    @Test // Test 4
+    @Test // Test 4: saveDictionary method
     void saveDictionary() {
         editedDictionary.saveDictionary();
-        reOpenedDictionary = new Dictionary("dictionary");
+        reOpenedDictionary = new Dictionary("test_dictionary");
         Assertions.assertEquals(editedDictionary.toString(),reOpenedDictionary.toString());
     }
 
-    @Test // Test 1: query meaning of existing word.
+    @Test // Test 5: query meaning of existing word.
     void processMessage1() {
         dictionary.addWord("banana", "fruit");
         Message query1 = new Message("query", "banana", "", "ENG");
@@ -64,7 +64,7 @@ class DictionaryTest {
         Assertions.assertEquals(realOutput1.toString(), testOutput1.toString());
     }
 
-    @Test // Test 2: query meaning of unknown word.
+    @Test // Test 6: query meaning of unknown word.
     void processMessage2() {
         Message query2 = new Message("query","ThisWordDoesNotExist","", "ENG");
         Message realOutput2 = dictionary.generateAnswer(query2);
@@ -72,7 +72,7 @@ class DictionaryTest {
         Assertions.assertEquals(realOutput2.toString(),testOutput2.toString());
     }
 
-    @Test // Test 3: add unknown word.
+    @Test // Test 7: add unknown word.
     void processMessage3() {
         Message query3 = new Message("add","ThisWordDoesNotExist","fruit", "ENG");
         Message realOutput3 = dictionary.generateAnswer(query3);
@@ -80,7 +80,7 @@ class DictionaryTest {
         Assertions.assertEquals(realOutput3.toString(),testOutput3.toString());
     }
 
-    @Test // Test 4: add already existing word.
+    @Test // Test 8: add already existing word.
     void processMessage4() {
         dictionary.addWord("apple","fruit");
         Message query4 = new Message("add","apple","fruit", "ENG");
@@ -89,7 +89,7 @@ class DictionaryTest {
         Assertions.assertEquals(realOutput4.toString(),testOutput4.toString());
     }
 
-    @Test // Test 5: remove unknown word.
+    @Test // Test 9: remove unknown word.
     void processMessage5() {
         Message query5 = new Message("remove","AnotherUnknownWord","", "ENG");
         Message realOutput5 = dictionary.generateAnswer(query5);
@@ -97,7 +97,7 @@ class DictionaryTest {
         Assertions.assertEquals(realOutput5.toString(),testOutput5.toString());
     }
 
-    @Test // Test 6: remove existing word
+    @Test // Test 10: remove existing word
     void processMessage6() {
         dictionary.addWord("banana","fruit");
         Message query6 = new Message("remove","banana","", "ENG");

@@ -1,21 +1,25 @@
+// Author: Alex Gonzalez Login ID: aagonzalez
+// Purpose: Assignment 1 - COMP90015: Distributed Systems
+
 package client;
 import utilities.Message;
-
+// Sockets libraries.
 import java.net.Socket;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
+// Exception libraries.
 import java.io.IOException;
 import java.io.EOFException;
 import java.net.ConnectException;
-
+// GUI libraries.
 import javax.swing.*;
 
+// Server class represents a client and includes the manipulation of a socket.
 public class Client {
 
     public static void main (String[] args) {
 
-        // Declare the server ip and the port number
+        // Reading the port number and the ip
         String ip = "";
         int port = 0;
 
@@ -40,10 +44,13 @@ public class Client {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
+            // The first message of the server is expect to inform the available languages.
             String availableDict = availableDictionaries(in);
+            // If an answer is received it is created the GUI for the user.
             ClientGUI clientGUI = new ClientGUI("Dictionary", out, availableDict);
             clientGUI.setVisible(true);
 
+            // In the GUI will send the messages, the answers will be read here.
             Message serverMsg;
             try {
                 while ((serverMsg = (Message) in.readObject()) != null )
@@ -65,6 +72,7 @@ public class Client {
         }
     }
 
+    // Processing of the first message with the available languages
     private static String availableDictionaries (ObjectInputStream in) {
         Message serverResponse = null;
         try {
@@ -77,6 +85,7 @@ public class Client {
         return serverResponse.getText();
     }
 
+    // Method used for show error information to the user. With all of these cases the program is closed.
     protected static void errorMessage (String exception) {
 
         String errorMsg = "Error: " + exception + ". ";
