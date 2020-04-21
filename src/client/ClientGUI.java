@@ -69,7 +69,7 @@ public class ClientGUI extends JFrame {
         }
 
         // General set up for the panel, main content for the frame.
-        mainPanel.setPreferredSize(new Dimension(620, 530));
+        mainPanel.setPreferredSize(new Dimension(720, 530));
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocation(40,70);
         this.setContentPane(mainPanel);

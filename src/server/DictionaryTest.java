@@ -19,33 +19,33 @@ class DictionaryTest {
 
         // For test 4
         editedDictionary = new Dictionary("test_dictionary");
-        editedDictionary.addWord("one","number");
-        editedDictionary.addWord("two","number");
-        editedDictionary.addWord("three","number");
+        editedDictionary.addWord("One","Number");
+        editedDictionary.addWord("Two","Number");
+        editedDictionary.addWord("Three","Number");
     }
 
     @Test // Test 1: add method
     void addWord() {
-        dictionary.removeWord("horse");
-        dictionary.addWord("horse","animal");
-        Assertions.assertTrue(dictionary.checkWord("horse"));
-        String meaning = dictionary.getMeaning("horse");
-        Assertions.assertEquals(meaning,"animal");
+        dictionary.removeWord("Horse");
+        dictionary.addWord("Horse","Animal");
+        Assertions.assertTrue(dictionary.checkWord("Horse"));
+        String meaning = dictionary.getMeaning("Horse");
+        Assertions.assertEquals(meaning,"Animal");
     }
 
     @Test // Test 2: remove method
     void removeWord() {
-        dictionary.addWord("cat","animal");
-        dictionary.removeWord("cat");
-        Assertions.assertFalse(dictionary.checkWord("cat"));
+        dictionary.addWord("Cat","Animal");
+        dictionary.removeWord("Cat");
+        Assertions.assertFalse(dictionary.checkWord("Cat"));
     }
 
     @Test // Test 3: checkWord method
     void checkWord() {
-        dictionary.removeWord("dog");
-        String meaning = dictionary.getMeaning("dog");
+        dictionary.removeWord("Dog");
+        String meaning = dictionary.getMeaning("Dog");
         Assertions.assertEquals(meaning,null);
-        Assertions.assertFalse(dictionary.checkWord("dog"));
+        Assertions.assertFalse(dictionary.checkWord("Dog"));
     }
 
     @Test // Test 4: saveDictionary method
@@ -57,10 +57,10 @@ class DictionaryTest {
 
     @Test // Test 5: query meaning of existing word.
     void processMessage1() {
-        dictionary.addWord("banana", "fruit");
-        Message query1 = new Message("query", "banana", "", "ENG");
+        dictionary.addWord("Banana", "Fruit");
+        Message query1 = new Message("query", "Banana", "", "ENG");
         Message realOutput1 = dictionary.generateAnswer(query1);
-        Message testOutput1 = new Message("meaning", "banana", "fruit", "ENG");
+        Message testOutput1 = new Message("meaning", "Banana", "Fruit", "ENG");
         Assertions.assertEquals(realOutput1.toString(), testOutput1.toString());
     }
 
@@ -74,7 +74,7 @@ class DictionaryTest {
 
     @Test // Test 7: add unknown word.
     void processMessage3() {
-        Message query3 = new Message("add","ThisWordDoesNotExist","fruit", "ENG");
+        Message query3 = new Message("add","ThisWordDoesNotExist","Fruit", "ENG");
         Message realOutput3 = dictionary.generateAnswer(query3);
         Message testOutput3 = new Message("added","ThisWordDoesNotExist","", "ENG");
         Assertions.assertEquals(realOutput3.toString(),testOutput3.toString());
@@ -82,10 +82,10 @@ class DictionaryTest {
 
     @Test // Test 8: add already existing word.
     void processMessage4() {
-        dictionary.addWord("apple","fruit");
-        Message query4 = new Message("add","apple","fruit", "ENG");
+        dictionary.addWord("Apple","Fruit");
+        Message query4 = new Message("add","Apple","Fruit", "ENG");
         Message realOutput4 = dictionary.generateAnswer(query4);
-        Message testOutput4 = new Message("word_already_exists","apple","", "ENG");
+        Message testOutput4 = new Message("word_already_exists","Apple","", "ENG");
         Assertions.assertEquals(realOutput4.toString(),testOutput4.toString());
     }
 
@@ -99,10 +99,10 @@ class DictionaryTest {
 
     @Test // Test 10: remove existing word
     void processMessage6() {
-        dictionary.addWord("banana","fruit");
-        Message query6 = new Message("remove","banana","", "ENG");
+        dictionary.addWord("Banana","Bruit");
+        Message query6 = new Message("remove","Banana","", "ENG");
         Message realOutput6 = dictionary.generateAnswer(query6);
-        Message testOutput6 = new Message("removed","banana","", "ENG");
+        Message testOutput6 = new Message("removed","Banana","", "ENG");
         Assertions.assertEquals(realOutput6.toString(),testOutput6.toString());
     }
 }

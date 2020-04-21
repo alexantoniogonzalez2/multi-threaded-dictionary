@@ -82,6 +82,7 @@ public class Dictionary {
         switch(type){
             case "query":
                 String meaning = this.getMeaning(word);
+                System.out.println(meaning);
                 if (meaning != null)
                     answer = new Message("meaning",word,meaning,language);
                 else {
