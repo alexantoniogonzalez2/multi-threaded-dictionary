@@ -25,9 +25,3 @@
 
 ### Testing ###
 * 15 tests are provided. It was run with the functionality of IntelliJ. 
-
-### Owner ###
-* Alex González - aagonzalez@student.unimelb.edu.au
-
-### GIT Repository (private) 
-* [https://aagonza1@bitbucket.org/aagonza1/multi-threaded-dictionary.git](https://aagonza1@bitbucket.org/aagonza1/multi-threaded-dictionary.git)
